@@ -5,7 +5,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
     container_name: myapp
     volumes:
-      - ..:/workspace
+      - ..:/home/developer/workspace
     ports:
       - "${APP_PORT}:8000"
     env_file:

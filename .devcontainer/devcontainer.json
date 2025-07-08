@@ -1,6 +1,6 @@
 {
-  "name": "Python Project",
   "dockerComposeFile": "compose.yaml",
   "service": "app",
-  "workspaceFolder": "/workspace"
+  "workspaceFolder": "/home/developer/workspace",
+  "remoteUser": "developer"
 }
