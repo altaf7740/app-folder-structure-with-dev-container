@@ -2,5 +2,6 @@
   "dockerComposeFile": "compose.yaml",
   "service": "app",
   "workspaceFolder": "/home/developer/workspace",
-  "remoteUser": "developer"
+  "remoteUser": "developer",
+  "postCreateCommand": "echo 'eval \"$(starship init zsh)\"; export STARSHIP_CONFIG=\"$HOME/.config/starship.toml\"' >> ~/.zshrc"
 }
