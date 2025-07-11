@@ -3,35 +3,10 @@
   "service": "app",
   "workspaceFolder": "/home/developer/workspace",
   "remoteUser": "developer",
-  "postCreateCommand": "echo '✅ Dev container is ready!'",
-  "postStartCommand": "echo '👉 TIP: Use MesloLGS NF font in your terminal for best Starship experience.'",
   "customizations": {
     "vscode": {
       "settings": {
-        // Terminal appearance
-        "terminal.integrated.fontFamily": "MesloLGS Nerd Font Mono",
-        "terminal.integrated.fontSize": 14,
-        "terminal.integrated.cursorStyle": "underline",
-        "terminal.integrated.cursorWidth": 2,
-        "terminal.integrated.gpuAcceleration": "on",
-        "terminal.integrated.defaultProfile.linux": "zsh",
-        // Color scheme
-        "workbench.colorTheme": "Default Dark Modern",
-        "terminal.integrated.theme": "terminal",
-        "terminal.integrated.tabs.highlight": "active",
-        "terminal.integrated.localEchoExcludePrograms": [
-          "vim",
-          "nano",
-          "tmux"
-        ],
-        // Starship configuration
-        "terminal.integrated.shell.linux": "/bin/zsh",
-        "terminal.integrated.env.linux": {
-          "STARSHIP_CONFIG": "/home/developer/.config/starship.toml"
-        },
-        // Python settings
         "python.defaultInterpreterPath": "/home/developer/.venv/bin/python",
-        // Ruff configuration
         "ruff.path": [
           "${workspaceFolder}/.venv/bin/ruff"
         ],

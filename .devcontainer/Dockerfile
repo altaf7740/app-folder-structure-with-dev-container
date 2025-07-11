@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 
 
 RUN apt update && \
-    apt install -y --no-install-recommends sudo zsh curl git fonts-powerline && \
+    apt install -y --no-install-recommends sudo zsh curl git && \
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/zsh-syntax-highlighting && \
     git clone https://github.com/zsh-users/zsh-autosuggestions.git /opt/zsh-autosuggestions && \
@@ -20,15 +20,12 @@ COPY . .
 USER developer
 
 RUN mkdir -p ~/.config && \
-    curl -fsSL https://starship.rs/presets/toml/gruvbox-rainbow.toml \
-    -o ~/.config/starship.toml && \
+    starship preset pure-preset --output $HOME/.config/starship.toml && \
     echo 'export STARSHIP_CONFIG="$HOME/.config/starship.toml"' >> ~/.zshrc && \
     echo 'eval "$(starship init zsh)"' >> ~/.zshrc && \
     echo 'source /opt/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> ~/.zshrc && \
     echo 'source /opt/zsh-autosuggestions/zsh-autosuggestions.zsh' >> ~/.zshrc && \
     echo 'ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#999999"' >> ~/.zshrc
-
-
 
 
 RUN uv sync
