@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 
 
 RUN apt update && \
-    apt install -y --no-install-recommends sudo zsh curl git && \
+    apt install -y --no-install-recommends sudo zsh curl git openssh-client && \
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/zsh-syntax-highlighting && \
     git clone https://github.com/zsh-users/zsh-autosuggestions.git /opt/zsh-autosuggestions && \
