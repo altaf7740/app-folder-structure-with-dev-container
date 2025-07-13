@@ -51,7 +51,7 @@ RUN useradd --create-home --shell /bin/bash --uid 1001 appuser
 
 WORKDIR /home/appuser/app
 
-COPY pyproject.toml poetry.lock* ./  # or requirements.txt
+COPY pyproject.toml poetry.lock* ./
 
 RUN uv sync --no-dev --no-install
 

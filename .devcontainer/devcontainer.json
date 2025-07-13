@@ -18,7 +18,8 @@
         "eamodio.gitlens",
         "usernamehw.errorlens",
         "bierner.markdown-preview-github-styles",
-        "ms-vscode-remote.remote-containers"
+        "ms-vscode-remote.remote-containers",
+        "alefragnani.project-manager"
       ]
     }
   }
