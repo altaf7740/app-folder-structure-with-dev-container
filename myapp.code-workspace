@@ -16,7 +16,8 @@
   "settings": {
     "projectManager.git.baseFolders": [
       "${workspaceFolder}/src",
-      "${workspaceFolder}/frontend"
+      "${workspaceFolder}/frontend",
+      "${workspaceFolder}"
     ]
   }
 }

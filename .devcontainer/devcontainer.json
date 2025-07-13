@@ -6,7 +6,7 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/home/developer/.venv/bin/python",
+        "python.defaultInterpreterPath": "/home/developer/workspace/.venv/bin/python",
         "ruff.path": [
           "${workspaceFolder}/.venv/bin/ruff"
         ],

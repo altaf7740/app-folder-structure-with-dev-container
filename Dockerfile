@@ -27,8 +27,10 @@ RUN useradd -m -s /bin/zsh developer && \
 USER developer
 WORKDIR /home/developer/workspace
 
+# use "catppuccin-powerline" with "pure-preset" of starship if you don't have nerd-fonts installed in your host OS.
+# If set then also check for vscode terminal fonts, it should be either 'MesloLGS Nerd Font Mono' or 'Fira Code'
 RUN mkdir -p ~/.config && \
-    starship preset pure-preset --output ~/.config/starship.toml && \
+    starship preset catppuccin-powerline --output ~/.config/starship.toml && \  
     echo 'export STARSHIP_CONFIG="$HOME/.config/starship.toml"' >> ~/.zshrc && \
     echo 'eval "$(starship init zsh)"' >> ~/.zshrc && \
     echo 'source /opt/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> ~/.zshrc && \
