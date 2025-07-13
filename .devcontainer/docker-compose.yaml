@@ -9,11 +9,20 @@ services:
       - ..:/home/developer/workspace
     ports:
       - "${APP_PORT}:8000"
+      - "5173:5173"
     env_file:
       - ../.env
     depends_on:
       - db
-    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      bash -c "
+        cd /home/developer/workspace/frontend && 
+        npm install &&
+        npm run dev -- --host &
+        cd /home/developer/workspace &&
+        uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+      "
 
   db:
     image: postgres:15

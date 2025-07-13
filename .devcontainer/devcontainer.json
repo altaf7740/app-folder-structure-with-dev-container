@@ -10,7 +10,17 @@
         "ruff.path": [
           "${workspaceFolder}/.venv/bin/ruff"
         ],
-        "python.linting.ruffEnabled": true
+        "python.linting.ruffEnabled": true,
+        "explorer.fileNesting.enabled": true,
+        "explorer.fileNesting.patterns": {
+          "tsconfig.json": "tsconfig.*.json, env.d.ts",
+          "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
+          "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig"
+        },
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit"
+        },
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
       },
       "extensions": [
         "ms-python.python",
@@ -19,7 +29,12 @@
         "usernamehw.errorlens",
         "bierner.markdown-preview-github-styles",
         "ms-vscode-remote.remote-containers",
-        "alefragnani.project-manager"
+        "alefragnani.project-manager",
+        "Vue.volar",
+        "vitest.explorer",
+        "dbaeumer.vscode-eslint",
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode"
       ]
     }
   }
