@@ -1,7 +1,7 @@
-from litestar import Litestar, get
+from fastapi import FastAPI
 
-@get("/")
-def hello_world() -> str:
-    return "Hello, World!"
+app = FastAPI()
 
-app = Litestar(route_handlers=[hello_world])
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}

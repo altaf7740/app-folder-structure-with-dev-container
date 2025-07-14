@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: ./Dockerfile
       target: dev
-    container_name: myapp
+    container_name: app
     volumes:
       - ..:/home/developer/workspace
     ports:
@@ -18,7 +18,7 @@ services:
 
   db:
     image: postgres:15
-    container_name: mydb
+    container_name: db
     ports:
       - "${POSTGRES_PORT}:5432"
     env_file:
@@ -28,7 +28,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: mypgadmin
+    container_name: pgadmin
     ports:
       - "${PGADMIN_PORT}:80"
     env_file:
