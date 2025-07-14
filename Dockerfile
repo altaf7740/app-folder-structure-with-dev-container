@@ -15,7 +15,8 @@ FROM base AS dev
 
 RUN apt update && \
     apt install -y --no-install-recommends sudo zsh curl git openssh-client && \
-    rm -rf /var/lib/apt/lists/*
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt install -y nodejs
 
 RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/zsh-syntax-highlighting && \
