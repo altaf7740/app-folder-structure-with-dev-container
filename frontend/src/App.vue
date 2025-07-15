@@ -1,7 +1,10 @@
 <template>
   <form @submit.prevent="handleSubmit">
-    <input v-model="name" type="text" name="name" placeholder="Name" required />
-    <input v-model.number="age" type="number" name="age" placeholder="Age" required />
+    <input v-model="comment" type="text" name="comment" placeholder="Comment" required />
+    <label>
+      <input type="checkbox" v-model="isActivated" />
+      Activate this model
+    </label>
     <input ref="folderInput" type="file" name="folder" webkitdirectory multiple required />
     <button type="submit">Upload</button>
   </form>
@@ -10,22 +13,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const name = ref('')
-const age = ref<number | null>(null)
+const comment = ref('')
+const isActivated = ref(false)
 const folderInput = ref<HTMLInputElement | null>(null)
 
 const handleSubmit = async () => {
   if (!folderInput.value?.files?.length) return
 
   const formData = new FormData()
-  formData.append('name', name.value)
-  formData.append('age', age.value?.toString() || '')
+  formData.append('comment', comment.value)
+  formData.append('is_activated_aimodel', isActivated.value.toString())
 
   Array.from(folderInput.value.files).forEach(file => {
     formData.append('folder', file, file.webkitRelativePath)
   })
 
-  const res = await fetch('http://localhost:8000/upload', {
+  const res = await fetch('http://localhost:8000/aimodels', {
     method: 'POST',
     body: formData,
   })

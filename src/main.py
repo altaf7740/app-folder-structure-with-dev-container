@@ -1,15 +1,13 @@
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-
-import os, uuid, shutil
-from typing import List
-
-from .models import FolderEntry
-from .schemas import FolderOut
-from .database import get_db, init_db
 from sqlalchemy.orm import Session
+from typing import List
+import os, uuid, shutil
+
+from .models import AIModel
+from .schemas import AIModelCreate, AIModelUpdate, AIModelOut
+from .database import init_db, get_db
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -20,15 +18,20 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 init_db()
 
-@app.post("/upload", response_model=FolderOut)
-async def upload_folder(request: Request, db: Session = Depends(get_db)):
+@app.post("/aimodels", response_model=AIModelOut)
+async def upload_aimodel(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
-    name = form["name"]
-    age = int(form["age"])
+    comment = form["comment"]
+    is_activated = form.get("is_activated_aimodel", "false").lower() == "true"
     files = form.getlist("folder")
 
-    folder_id = str(uuid.uuid4())
-    folder_path = os.path.join(UPLOAD_DIR, folder_id)
+    if is_activated:
+        db.query(AIModel).filter(AIModel.is_activated_aimodel == True).update(
+            {AIModel.is_activated_aimodel: False}
+        )
+
+    model_id = str(uuid.uuid4())
+    folder_path = os.path.join(UPLOAD_DIR, model_id)
     os.makedirs(folder_path, exist_ok=True)
 
     for file in files:
@@ -37,46 +40,67 @@ async def upload_folder(request: Request, db: Session = Depends(get_db)):
         with open(path, "wb") as f:
             f.write(await file.read())
 
-    entry = FolderEntry(name=name, age=age, folder_path=folder_path)
+    entry = AIModel(
+        id=model_id,
+        comment=comment,
+        is_activated_aimodel=is_activated,
+        model_folder_path=folder_path
+    )
     db.add(entry)
     db.commit()
     db.refresh(entry)
     return entry
 
-@app.get("/folder-list", response_model=List[FolderOut])
-def list_folders(db: Session = Depends(get_db)):
-    return db.query(FolderEntry).all()
 
-@app.get("/folder-list/{folder_id}", response_model=FolderOut)
-def get_folder(folder_id: int, db: Session = Depends(get_db)):
-    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not entry:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    return entry
-
-@app.put("/folder-list/{folder_id}", response_model=FolderOut)
-async def update_folder(
-    folder_id: int,
-    name: str = Form(...),
-    age: int = Form(...),
+@app.put("/aimodels/{model_id}", response_model=AIModelOut)
+async def update_aimodel(
+    model_id: str,
+    comment: str = Form(...),
+    is_activated_aimodel: bool = Form(...),
     db: Session = Depends(get_db)
 ):
-    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not entry:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    entry.name = name
-    entry.age = age
-    db.commit()
-    db.refresh(entry)
-    return entry
+    model = db.query(AIModel).filter(AIModel.id == model_id).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="Model not found")
 
-@app.delete("/folder-list/{folder_id}")
-def delete_folder(folder_id: int, db: Session = Depends(get_db)):
-    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not entry:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    if os.path.exists(entry.folder_path):
-        shutil.rmtree(entry.folder_path)
-    db.delete(entry)
+    if is_activated_aimodel:
+        db.query(AIModel).filter(AIModel.is_activated_aimodel == True).update(
+            {AIModel.is_activated_aimodel: False}
+        )
+
+    model.comment = comment
+    model.is_activated_aimodel = is_activated_aimodel
+    db.commit()
+    db.refresh(model)
+    return model
+
+
+@app.get("/aimodels/active", response_model=AIModelOut)
+def get_active_model(db: Session = Depends(get_db)):
+    model = db.query(AIModel).filter(AIModel.is_activated_aimodel == True).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="No active model found")
+    return model
+
+
+@app.get("/aimodels", response_model=List[AIModelOut])
+def list_aimodels(db: Session = Depends(get_db)):
+    return db.query(AIModel).all()
+
+@app.get("/aimodels/{model_id}", response_model=AIModelOut)
+def get_aimodel(model_id: str, db: Session = Depends(get_db)):
+    model = db.query(AIModel).filter(AIModel.id == model_id).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="Model not found")
+    return model
+
+@app.delete("/aimodels/{model_id}")
+def delete_aimodel(model_id: str, db: Session = Depends(get_db)):
+    model = db.query(AIModel).filter(AIModel.id == model_id).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="Model not found")
+    if os.path.exists(model.model_folder_path):
+        shutil.rmtree(model.model_folder_path)
+    db.delete(model)
     db.commit()
     return {"status": "deleted"}

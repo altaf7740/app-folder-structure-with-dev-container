@@ -1,18 +1,21 @@
 from pydantic import BaseModel
+from datetime import datetime
 
-class FolderBase(BaseModel):
-    name: str
-    age: int
+class AIModelBase(BaseModel):
+    comment: str
+    is_activated_aimodel: bool
 
-class FolderCreate(FolderBase):
+class AIModelCreate(AIModelBase):
     pass
 
-class FolderUpdate(FolderBase):
+class AIModelUpdate(AIModelBase):
     pass
 
-class FolderOut(FolderBase):
-    id: int
-    folder_path: str
+class AIModelOut(AIModelBase):
+    id: str
+    model_folder_path: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
