@@ -1,94 +1,82 @@
-from fastapi import FastAPI, Request, HTTPException, Form
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.exc import NoResultFound
+from fastapi.responses import JSONResponse
 
-import os
-import uuid
-os.makedirs("uploads", exist_ok=True)  # <-- ADD THIS LINE BEFORE FastAPI init
+import os, uuid, shutil
+from typing import List
+
+from .models import FolderEntry
+from .schemas import FolderOut
+from .database import get_db, init_db
+from sqlalchemy.orm import Session
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
-engine = create_engine("sqlite:///./folders.db")
-Session = sessionmaker(bind=engine)
-Base = declarative_base()
+init_db()
 
-class FolderEntry(Base):
-    __tablename__ = "folders"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
-    folder_path = Column(String)
-
-Base.metadata.create_all(bind=engine)
-
-@app.post("/upload")
-async def upload_folder(request: Request):
+@app.post("/upload", response_model=FolderOut)
+async def upload_folder(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
     name = form["name"]
     age = int(form["age"])
     files = form.getlist("folder")
 
     folder_id = str(uuid.uuid4())
-    folder_path = os.path.join("uploads", folder_id)
+    folder_path = os.path.join(UPLOAD_DIR, folder_id)
     os.makedirs(folder_path, exist_ok=True)
 
     for file in files:
-        rel_path = file.filename
-        file_path = os.path.join(folder_path, rel_path)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "wb") as f:
+        path = os.path.join(folder_path, file.filename)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
             f.write(await file.read())
 
-    db = Session()
     entry = FolderEntry(name=name, age=age, folder_path=folder_path)
     db.add(entry)
     db.commit()
-    return JSONResponse({"status": "success", "folder_id": folder_id})
+    db.refresh(entry)
+    return entry
 
-@app.get("/folder-list")
-def get_all_folders():
-    db = Session()
-    folders = db.query(FolderEntry).all()
-    return [{"id": f.id, "name": f.name, "age": f.age, "folder_path": f.folder_path} for f in folders]
+@app.get("/folder-list", response_model=List[FolderOut])
+def list_folders(db: Session = Depends(get_db)):
+    return db.query(FolderEntry).all()
 
-@app.get("/folder-list/{folder_id}")
-def get_folder(folder_id: int):
-    db = Session()
-    folder = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not folder:
+@app.get("/folder-list/{folder_id}", response_model=FolderOut)
+def get_folder(folder_id: int, db: Session = Depends(get_db)):
+    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
+    if not entry:
         raise HTTPException(status_code=404, detail="Folder not found")
-    return {"id": folder.id, "name": folder.name, "age": folder.age, "folder_path": folder.folder_path}
+    return entry
 
-@app.put("/folder-list/{folder_id}")
-async def update_folder(folder_id: int, name: str = Form(...), age: int = Form(...)):
-    db = Session()
-    folder = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not folder:
+@app.put("/folder-list/{folder_id}", response_model=FolderOut)
+async def update_folder(
+    folder_id: int,
+    name: str = Form(...),
+    age: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
+    if not entry:
         raise HTTPException(status_code=404, detail="Folder not found")
-    folder.name = name
-    folder.age = age
+    entry.name = name
+    entry.age = age
     db.commit()
-    return {"status": "updated"}
+    db.refresh(entry)
+    return entry
 
 @app.delete("/folder-list/{folder_id}")
-def delete_folder(folder_id: int):
-    db = Session()
-    folder = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
-    if not folder:
+def delete_folder(folder_id: int, db: Session = Depends(get_db)):
+    entry = db.query(FolderEntry).filter(FolderEntry.id == folder_id).first()
+    if not entry:
         raise HTTPException(status_code=404, detail="Folder not found")
-    if os.path.exists(folder.folder_path):
-        for root, dirs, files in os.walk(folder.folder_path, topdown=False):
-            for file in files:
-                os.remove(os.path.join(root, file))
-            for dir in dirs:
-                os.rmdir(os.path.join(root, dir))
-        os.rmdir(folder.folder_path)
-    db.delete(folder)
+    if os.path.exists(entry.folder_path):
+        shutil.rmtree(entry.folder_path)
+    db.delete(entry)
     db.commit()
     return {"status": "deleted"}
