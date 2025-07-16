@@ -1,6 +1,8 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
   "service": "app",
+  "overrideCommand": true,
+  "postStartCommand": ".devcontainer/entrypoint.sh",
   "workspaceFolder": "/home/developer/workspace",
   "remoteUser": "developer",
   "customizations": {

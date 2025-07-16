@@ -14,7 +14,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 FROM base AS dev
 
 RUN apt update && \
-    apt install -y --no-install-recommends sudo zsh curl git openssh-client && \
+    apt install -y --no-install-recommends sudo zsh curl git openssh-client procps iproute2 net-tools && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt install -y nodejs
 
