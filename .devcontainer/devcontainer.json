@@ -1,9 +1,9 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
   "service": "app",
-  "overrideCommand": true,
-  "postStartCommand": ".devcontainer/entrypoint.sh",
   "workspaceFolder": "/home/developer/workspace",
+  "overrideCommand": false,
+   "shutdownAction": "stopCompose",
   "remoteUser": "developer",
   "customizations": {
     "vscode": {
